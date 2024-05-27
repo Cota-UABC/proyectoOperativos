@@ -7,16 +7,17 @@
 #include <stdint.h>
 
 #define MAX_INPUT_LENGTH 512
+#define MAX_STDIN_BUFFER 512
 #define MAX_COMMAND_LENGTH 256
 #define MAX_USER_LENGTH 256
 
 
 int main() 
 {
-    char input[MAX_INPUT_LENGTH];
-
-    char command[MAX_COMMAND_LENGTH];
-    char username[MAX_USER_LENGTH];
+    char ch;
+    uint16_t i;
+    uint8_t past_input_counter = 0;
+    char input[MAX_INPUT_LENGTH], command[MAX_COMMAND_LENGTH], username[MAX_USER_LENGTH];
 
     struct passwd *pw = getpwuid(getuid());//obtener usuario?
     strcpy(username, pw->pw_name);
@@ -26,10 +27,13 @@ int main()
         printf("\033[33m%s\033[34m:ENCRYPT SHELL>\033[0m", username);
         fflush(stdout);// para evitar errores de salida
 
-        fgets(input, sizeof(input), stdin);// get stdin
-        uint16_t  len = strlen(input);// eliminar salto de linea
-        if(input[len - 1] == '\n')
-            input[len - 1] = '\0';
+        i=0;
+        while ((ch = getchar()) != '\n')// stdin
+        {
+            input[i] = ch;
+            i++;
+        }
+        input[i] = '\0';
 
         char *args[MAX_INPUT_LENGTH];// dividir en tokens
         char *token = strtok(input, " ");
@@ -72,6 +76,7 @@ int main()
         } else            
             wait(NULL);// Proceso padre
     }
+
 
     return 0;
 }
