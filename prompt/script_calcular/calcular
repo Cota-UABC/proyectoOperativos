@@ -4,11 +4,11 @@
 #!/bin/bash
 
 if [ $# -ne 2 ]; then
-    echo "Uso: $0 <carpeta> <destinatario>"
+    echo "Parametros incorrectos"
+    echo "Uso: calcular <carpeta> <correo destinatario>"
     exit 1
 fi
 
-# Carpeta a analizar
 carpeta="$1"
 
 # Verifica si la carpeta existe

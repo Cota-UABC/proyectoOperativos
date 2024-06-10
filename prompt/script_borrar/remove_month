@@ -5,7 +5,8 @@
 
 #revisar numero de parametros
 if [ $# -ne 1 ]; then 
-    echo "Uso: $0 <directorio>"
+    echo "Parametros incorectos"
+    echo "Uso: remove_month <directorio>"
     exit 1
 fi
 

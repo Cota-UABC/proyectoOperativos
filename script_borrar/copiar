@@ -1,3 +1,0 @@
-#!/bin/bash
-
-cp -r -p ./archivos_c/* ./archivos

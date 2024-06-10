@@ -1,0 +1,11 @@
+#!/bin/bash
+
+cd ./archivos
+touch -d "2023-01-15 12:30:00" archivo3.txt
+touch -d "2023-06-15 12:30:00" archivo4.txt
+touch -d "2024-02-15 12:30:00" archivo5.txt
+touch -d "2023-09-15 12:30:00" archivo6.txt
+touch -d "2023-11-15 12:30:00" archivo7.txt
+touch -d "2024-03-15 12:30:00" archivo8.txt
+
+

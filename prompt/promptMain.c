@@ -15,11 +15,12 @@
 int main() 
 {
     char ch;
+    char full_path[MAX_INPUT_LENGTH];
     uint16_t i;
     uint8_t past_input_counter = 0;
     char input[MAX_INPUT_LENGTH], command[MAX_COMMAND_LENGTH], username[MAX_USER_LENGTH];
 
-    struct passwd *pw = getpwuid(getuid());//obtener usuario?
+    struct passwd *pw = getpwuid(getuid());//obtener usuario
     strcpy(username, pw->pw_name);
 
     while(1) 
@@ -55,23 +56,32 @@ int main()
         if (strcmp(args[0], "exit") == 0) //salir del prompt
             break;
 
-        // Verificar si el comando es _________
+        // Verificar comandos propios
         if (strcmp(args[0], "encrypt") == 0) 
         {
-            char full_path[MAX_INPUT_LENGTH];
             snprintf(full_path, sizeof(full_path), "./%s", args[0]);
+            args[0] = full_path;
+        }
+        else if(strcmp(args[0], "calcular") == 0)
+        {
+            snprintf(full_path, sizeof(full_path), "./script_calcular/%s", args[0]);
+            args[0] = full_path;
+        }
+        else if(strcmp(args[0], "remove_month") == 0)
+        {
+            snprintf(full_path, sizeof(full_path), "./script_borrar/%s", args[0]);
             args[0] = full_path;
         }
 
         pid_t pid = fork();// crear subproceso
 
         if (pid < 0) {// error
-            perror("Error al crear un proceso hijo");
+            printf("Error al crear un proceso hijo");
             exit(EXIT_FAILURE);
         } else if (pid == 0)// Proceso hijo
         {
             execvp(args[0], args);
-            perror("Error al ejecutar el comando");
+            printf("Error al ejecutar comando o no existe\n");
             break;
         } else            
             wait(NULL);// Proceso padre
