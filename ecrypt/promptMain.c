@@ -24,7 +24,7 @@ int main()
 
     while(1) 
     {
-        printf("\033[33m%s\033[34m:ENCRYPT PROMPT>\033[0m", username);
+        printf("\033[33m%s\033[34m:SHELL>\033[0m", username);
         fflush(stdout);// para evitar errores de salida
 
         i=0;
@@ -63,7 +63,7 @@ int main()
             args[0] = full_path;
         }
 
-        pid_t pid = fork();// crear subprocesos
+        pid_t pid = fork();// crear subproceso
 
         if (pid < 0) {// error
             perror("Error al crear un proceso hijo");

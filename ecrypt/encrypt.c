@@ -2,19 +2,24 @@
 #include <stdlib.h>
 #include <sys/wait.h>
 #include <string.h>
-#include<fcntl.h>
+#include <fcntl.h>
 #include <stdint.h>
+#include<unistd.h>
 
-#define CLAVE_DAFAULT "9c2[v:a$v/!0SCq?w2"
+#define CLAVE_DEFAULT "9c2[v:a$v/!0SCq?w2"
+#define BUFFER_LENGHT 20
 #define MAX_NAME_LENGHT 256
 
+void uso(void);
 void encrypt(char*, char*, char*);
 void decrypt(char*, char*, char*);
 
 int main(int argc, char *argv[])
 {
-    if (argc > 5) {
-        printf("Demasiadados argumentos\n");
+    if(argc != 4 && argc != 5) 
+    {
+        printf("Parametros incorrectos\n");
+        uso();
         return 1;
     }
 
@@ -25,7 +30,7 @@ int main(int argc, char *argv[])
             encrypt(argv[2], argv[3], argv[4]);
         if(argc == 4)
         {
-            char *clave_default = CLAVE_DAFAULT;
+            char *clave_default = CLAVE_DEFAULT;
             encrypt(argv[2], argv[3], clave_default);
         }
     }
@@ -35,32 +40,48 @@ int main(int argc, char *argv[])
             decrypt(argv[2], argv[3], argv[4]);
         if(argc == 4)
         {
-            char *clave_default = CLAVE_DAFAULT;
+            char *clave_default = CLAVE_DEFAULT;
             decrypt(argv[2], argv[3], clave_default);
         }
     }
     else
-        printf("Argumentos invalidos\n");
+    {
+        printf("OPCION INVALIDA\n");
+        uso();
+    }
 
     return 0;
 }
 
-void encrypt(char* input_file_location, char* output_name, char* clave) 
+void uso(void)
 {
-    int descriptor_origen, descriptor_enc;
-    uint8_t semi_clave=0, buffer;
+    printf("Uso: encrypt [-OPCION] [RUTA ARCHIVO FUENTE] [RUTA ARCHIVO DE SALIDA] [CLAVE]\n\n");
+    printf("Opciones:\n");
+    printf("    -e      Encriptar\n");
+    printf("    -d      Desencriptar\n\n");
+    printf("Clave: Opcional\n");
+}
+
+void encrypt(char* input_file_location, char* output_file, char* clave) 
+{
+    int descriptor_origen, descriptor_enc, bytes_lectura, bytes_grabados;
+    uint8_t semi_clave=0, buffer[BUFFER_LENGHT];
     uint16_t temp;
 
     descriptor_origen = open(input_file_location, O_RDONLY);
-    if(source_fd == -1) 
+    if(descriptor_origen == -1) 
     {
         printf("Error al abrir el archivo de origen\n");
+        close(descriptor_origen);
         exit(EXIT_FAILURE);
     }
 
-    descriptor_enc = open(output_name, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-    if (dest_fd == -1) {
-        perror("Error al crear el archivo destino\n");
+    descriptor_enc = open(output_file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    if (descriptor_enc == -1) 
+    {
+        printf("Error al crear el archivo destino\n");
+        close(descriptor_origen);
+        close(descriptor_enc);
         exit(EXIT_FAILURE);
     }
 
@@ -73,86 +94,113 @@ void encrypt(char* input_file_location, char* output_name, char* clave)
             semi_clave |= (1<<(i/2));
     }
 
-    while ((bytes_read = read(fd, buffer, BUFFER_SIZE)) > 0) {
-        //fwrite(buffer, sizeof(char), bytes_read, stdout);
-        if(bytes_read < BUFFER_SIZE)
-            buffer[bytes_read] = '\0';
-        printf("%s", buffer);
-    }
-
-    /*{
-        FILE *input_file = fopen(input_file_location, "rb");// open file
-        if (input_file == NULL) 
-        {
-            perror("Error al abrir el archivo de entrada");
-            return;
-        }
-
-        FILE *output_file = fopen(output_name, "wb");// crear output
-        if (output_file == NULL) 
-        {
-            perror("Error al crear el archivo de salida");
-            fclose(input_file);
-            return;
-        }
-        */
-        /*
-        int i = 0;
-        uint8_t ch;
-        while(1) 
-        {
-            ch = fgetc(input_file);//get byte
-            if(feof(input_file))// break if end of file
-                break;
-
-            fputc(ch ^ clave[i], output_file); // Operación XOR con la clave
-
-            i++;
-            if(i == strlen(clave))// repetir la clave en ciclos
-                i = 0;
-        }
-    }*/
-
-    printf("Archivo encriptado correctamente como %s\n",output_name);
-
-    fclose(input_file);
-    fclose(output_file);
-}
-
-void decrypt(char* input_file_location, char* output_name, char* clave)
-{
-    FILE *input_file = fopen(input_file_location, "rb");// open file
-    if (input_file == NULL) 
+    uint16_t i=0;
+    while ((bytes_lectura = read(descriptor_origen, buffer, 1)) > 0)// encriptar
     {
-        perror("Error al abrir el archivo de entrada");
-        return;
-    }
+        buffer[0] = buffer[0] ^ semi_clave;
 
-    FILE *output_file = fopen(output_name, "wb");// crear output
-    if (output_file == NULL) 
-    {
-        perror("Error al crear el archivo de salida");
-        fclose(input_file);
-        return;
-    }
+        buffer[0] -= 0x3e;
 
-    int i = 0;
-    uint8_t ch;
-    while(1) 
-    {
-        ch = fgetc(input_file);//get byte
-        if(feof(input_file))// break if end of file
-            break;
-
-        fputc(ch ^ clave[i], output_file); // Operación XOR con la clave
+        buffer[0] = buffer[0] ^ (uint8_t)clave[i];
 
         i++;
         if(i == strlen(clave))// repetir la clave en ciclos
             i = 0;
+        
+        bytes_grabados = write(descriptor_enc,buffer,1);
+        if(bytes_grabados == -1)
+        {
+            printf("Error en la escritura\n");
+            close(descriptor_origen);
+            close(descriptor_enc);
+            exit(EXIT_FAILURE);
+        }
     }
 
-     printf("Archivo decriptado como %s\n",output_name);
+    printf("Archivo encriptado correctamente como %s\n",output_file);
 
-    fclose(input_file);
-    fclose(output_file);
+    close(descriptor_origen);
+    close(descriptor_enc);
+}
+
+void decrypt(char* input_file_location, char* output_file, char* clave)
+{
+    int descriptor_origen, descriptor_enc, bytes_lectura, bytes_grabados;
+    uint8_t semi_clave=0, buffer[BUFFER_LENGHT];
+    uint16_t temp;
+
+    descriptor_origen = open(input_file_location, O_RDONLY);
+    if(descriptor_origen == -1) 
+    {
+        printf("Error al abrir el archivo de origen\n");
+        close(descriptor_origen);
+        exit(EXIT_FAILURE);
+    }
+
+    descriptor_enc = open(output_file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    if (descriptor_enc == -1) 
+    {
+        printf("Error al crear el archivo destino\n");
+        close(descriptor_origen);
+        close(descriptor_enc);
+        exit(EXIT_FAILURE);
+    }
+
+    temp = clave[1] | (clave[0]<<8); // tomar dos bytes de la clave
+    temp = -temp;// invertir valor
+
+    for(int i=0;i<16;i+=2)// generar semiclave
+    {
+        if((temp & (1<<i)) > 0)
+            semi_clave |= (1<<(i/2));
+    }
+
+    uint16_t i=0;
+    while ((bytes_lectura = read(descriptor_origen, buffer, 1)) > 0)// encriptar
+    {
+        buffer[0] = buffer[0] ^ (uint8_t)clave[i];
+
+        buffer[0] += 0x3e;
+
+        buffer[0] = buffer[0] ^ semi_clave;
+
+        i++;
+        if(i == strlen(clave))// repetir la clave en ciclos
+            i = 0;
+        
+        bytes_grabados = write(descriptor_enc,buffer,1);
+        if(bytes_grabados == -1)
+        {
+            printf("Error en la escritura\n");
+            close(descriptor_origen);
+            close(descriptor_enc);
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    printf("Archivo decriptado como %s\n",output_file);
+
+
+    close(descriptor_origen);
+    close(descriptor_enc);
+
+    descriptor_origen = open(output_file, O_RDONLY);
+
+    uint8_t cont = 0;
+    i=0;
+    while(cont<5 && i<30)// revisar que el archivo sea leible
+    {
+        bytes_lectura = read(descriptor_origen, buffer, 1);
+
+        if(bytes_lectura == -1 || (buffer[0] < 32) || (buffer[0] > 127))//revisar que leyo un caracter leible
+            cont++;
+        else if(bytes_lectura == 0)
+            break;
+        i++;
+    }
+
+    if(cont == 5)
+        printf("ADVERTENCIA: Se encontraron characteres poco comunes, posiblemente ingreso una clave incorecta\n");
+
+    close(descriptor_origen);
 }
