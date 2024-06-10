@@ -26,7 +26,6 @@ tamanio_total=$(du -sh "$carpeta" | cut -f1)
 
 echo "El tamaño total de los archivos en la carpeta es: $tamanio_total"
 
-cuerpo_correo="El tamaño total de los archivos en la carpeta '$carpeta' es: $tamanio_total"
-echo -e "Subject: Tamaño total de archivos\n\n$cuerpo_correo" | sendmail "$destinatario"
+echo "$tamanio_total" | mail -s "Tamaño de la carpeta" "$destinatario"
 
 echo "Correo enviado"
