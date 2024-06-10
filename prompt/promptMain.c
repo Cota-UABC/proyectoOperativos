@@ -87,6 +87,5 @@ int main()
             wait(NULL);// Proceso padre
     }
 
-
     return 0;
 }

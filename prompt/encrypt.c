@@ -4,11 +4,10 @@
 #include <string.h>
 #include <fcntl.h>
 #include <stdint.h>
-#include<unistd.h>
+#include <unistd.h>
 
 #define CLAVE_DEFAULT "9c2[v:a$v/!0SCq?w2"
 #define BUFFER_LENGHT 20
-#define MAX_NAME_LENGHT 256
 
 void uso(void);
 void encrypt(char*, char*, char*);
