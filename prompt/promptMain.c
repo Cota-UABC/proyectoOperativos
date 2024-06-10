@@ -53,11 +53,11 @@ int main()
             args[i] = NULL;//terminacion de argumentos
         }
 
-        if (strcmp(args[0], "exit") == 0) //salir del prompt
+        if(strcmp(args[0], "exit") == 0) //salir del prompt
             break;
 
         // Verificar comandos propios
-        if (strcmp(args[0], "encrypt") == 0) 
+        if(strcmp(args[0], "encrypt") == 0) 
         {
             snprintf(full_path, sizeof(full_path), "./%s", args[0]);
             args[0] = full_path;
@@ -72,18 +72,26 @@ int main()
             snprintf(full_path, sizeof(full_path), "./script_borrar/%s", args[0]);
             args[0] = full_path;
         }
+        else if(strcmp(args[0], "lista_repetidos") == 0) 
+        {
+            snprintf(full_path, sizeof(full_path), "./%s", args[0]);
+            args[0] = full_path;
+        }
 
         pid_t pid = fork();// crear subproceso
 
-        if (pid < 0) {// error
+        if (pid < 0) // error
+        {
             printf("Error al crear un proceso hijo");
             exit(EXIT_FAILURE);
-        } else if (pid == 0)// Proceso hijo
+        } 
+        else if (pid == 0)// Proceso hijo
         {
             execvp(args[0], args);
             printf("Error al ejecutar comando o no existe\n");
             break;
-        } else            
+        } 
+        else            
             wait(NULL);// Proceso padre
     }
 
