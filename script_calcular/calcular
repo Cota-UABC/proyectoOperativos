@@ -1,0 +1,32 @@
+#Script para calcular el tamaños total de archivos dentro de un carpeta y mandar
+#el resultado por correo
+
+#!/bin/bash
+
+if [ $# -ne 2 ]; then
+    echo "Uso: $0 <carpeta> <destinatario>"
+    exit 1
+fi
+
+# Carpeta a analizar
+carpeta="$1"
+
+# Verifica si la carpeta existe
+if [ ! -d "$carpeta" ]; then
+    echo "La carpeta '$carpeta' no existe."
+    exit 1
+fi
+
+# Dirección de correo electrónico del destinatario
+destinatario="$2"
+
+# Calcula el tamaño total de los archivos en la carpeta
+tamanio_total=$(du -sh "$carpeta" | cut -f1)
+
+
+echo "El tamaño total de los archivos en la carpeta es: $tamanio_total"
+
+cuerpo_correo="El tamaño total de los archivos en la carpeta '$carpeta' es: $tamanio_total"
+echo -e "Subject: Tamaño total de archivos\n\n$cuerpo_correo" | sendmail "$destinatario"
+
+echo "Correo enviado"

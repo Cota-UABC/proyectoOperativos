@@ -24,7 +24,7 @@ int main()
 
     while(1) 
     {
-        printf("\033[33m%s\033[34m:ENCRYPT SHELL>\033[0m", username);
+        printf("\033[33m%s\033[34m:ENCRYPT PROMPT>\033[0m", username);
         fflush(stdout);// para evitar errores de salida
 
         i=0;

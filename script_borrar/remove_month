@@ -1,0 +1,30 @@
+#Script para borrar todos los archivos dentro de un directorio dado, con una modificacion
+#de mas de un mes.
+
+#!/bin/bash
+
+#revisar numero de parametros
+if [ $# -ne 1 ]; then 
+    echo "Uso: $0 <directorio>"
+    exit 1
+fi
+
+carpeta="$1" 
+
+dias_modif=30
+
+# Encuentra archivos dentro de la carpetad
+archivos_antiguos=$(find "$carpeta" -type f -mtime +$dias_modif)
+
+# Verifica si hay archivos antiguos
+if [ -z "$archivos_antiguos" ]; then
+    echo "No se encontraron archivos antiguos en: '$carpeta'."
+else
+    echo "Archivos antiguos encontrados en: '$carpeta':"
+    for archivo in $archivos_antiguos; do
+        echo "$(basename "$archivo")"
+    done
+
+    find "$carpeta" -type f -mtime +$dias_modif -exec rm {} \;
+    echo "Archivos eliminados."
+fi
