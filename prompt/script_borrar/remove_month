@@ -14,10 +14,10 @@ carpeta="$1"
 
 dias_modif=30
 
-# Encuentra archivos dentro de la carpetad
+# Encuentra archivos dentro de la carpeta
 archivos_antiguos=$(find "$carpeta" -type f -mtime +$dias_modif)
 
-# Verifica si hay archivos antiguos
+
 if [ -z "$archivos_antiguos" ]; then
     echo "No se encontraron archivos antiguos en: '$carpeta'."
 else
