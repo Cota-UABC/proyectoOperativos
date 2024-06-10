@@ -77,6 +77,11 @@ int main()
             snprintf(full_path, sizeof(full_path), "./%s", args[0]);
             args[0] = full_path;
         }
+        else if(strcmp(args[0], "crear_archivos") == 0) 
+        {
+            snprintf(full_path, sizeof(full_path), "./%s", args[0]);
+            args[0] = full_path;
+        }
 
         pid_t pid = fork();// crear subproceso
 
